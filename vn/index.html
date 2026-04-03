@@ -22,8 +22,11 @@
     #vn-background {
       position: absolute;
       inset: 0;
-      background: var(--bg);
-      transition: background 0.6s ease;
+      background-color: var(--bg);
+      background-size: cover;
+      background-position: center top;
+      background-repeat: no-repeat;
+      transition: background-image 0.4s ease, background-color 0.4s ease;
     }
 
     #vn-character {
@@ -40,6 +43,7 @@
       height: 100%;
       width: auto;
       object-fit: contain;
+      object-position: bottom center;
       display: block;
     }
 
@@ -226,7 +230,8 @@
       {
         speaker: "",
         text: "...",
-        image: "../art/Illustration9.jpg"
+        image: "../art/Illustration9_sprite.jpg",
+        bg: "../art/IMG_8371.jpeg"
       },
       {
         speaker: "???",
@@ -284,7 +289,15 @@
 
       // Fundo
       if (beat.bg) {
-        els.background.style.background = beat.bg;
+        const ext = beat.bg.toLowerCase();
+        if (beat.bg.startsWith('url(') || ext.endsWith('.jpg') || ext.endsWith('.jpeg') || ext.endsWith('.png') || ext.endsWith('.webp')) {
+          const url = beat.bg.startsWith('url(') ? beat.bg : `url(${beat.bg})`;
+          els.background.style.backgroundImage = url;
+          els.background.style.backgroundColor = '';
+        } else {
+          els.background.style.backgroundImage = '';
+          els.background.style.backgroundColor = beat.bg;
+        }
       }
 
       // Nome
