@@ -3,7 +3,6 @@ const els = {
   startScreen:       document.getElementById('vn-start-screen'),
   map:               document.getElementById('vn-map'),
   playerEl:          document.getElementById('player'),
-  destEl:            document.getElementById('destination'),
   scene:             document.getElementById('vn-scene'),
   background:        document.getElementById('vn-background'),
   charImg:           document.getElementById('char-img'),
@@ -30,7 +29,7 @@ function startGame() {
   els.startScreen.style.display = 'none';
   els.map.style.display = 'block';
   resetGame();
-  gameState = 'walking';
+  gameState = 'hub';
   const stage = document.getElementById('vn-stage');
   stage.focus({ preventScroll: true });
   getAudioCtx();
@@ -83,18 +82,7 @@ function handleKeyDown(e) {
     return;
   }
 
-  if (gameState === 'game_over') {
-    if (['Enter', 'Space'].includes(e.code)) {
-      e.preventDefault();
-      resetGame();
-      els.map.style.display = 'none';
-      els.startScreen.style.display = 'flex';
-      gameState = 'start';
-    }
-    return;
-  }
-
-  if (gameState === 'walking') {
+  if (gameState === 'hub') {
     if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',
          'KeyW','KeyS','KeyA','KeyD'].includes(e.code)) {
       e.preventDefault();

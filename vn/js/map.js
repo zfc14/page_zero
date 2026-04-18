@@ -1,6 +1,5 @@
 // ── ESTADO DO MAPA ────────────────────────────────────────────────────────
 const player = { x: 0, y: 0 };
-const dest   = { x: 0, y: 0 };
 const TRIGGER_DIST = 40;
 const keys = {};
 
@@ -77,6 +76,22 @@ function drawWindParticles(ctx) {
   }
 }
 
+// ── MARKERS DE CENÁRIO ────────────────────────────────────────────────────
+function drawScenarioMarkers(ctx, W, H) {
+  ctx.save();
+  ctx.font = '11px "DotGothic16", monospace';
+  ctx.textAlign = 'center';
+  Object.values(SCENARIOS).forEach(scenario => {
+    const mx = scenario.mapMarker.x * W;
+    const my = scenario.mapMarker.y * H;
+    ctx.fillStyle = '#f5c542';
+    ctx.fillRect(mx - 15, my - 15, 30, 30);
+    ctx.fillStyle = '#fff';
+    ctx.fillText(scenario.title, mx, my - 22);
+  });
+  ctx.restore();
+}
+
 function drawAll() {
   const canvas = document.getElementById('wind-canvas');
   const ctx    = canvas.getContext('2d');
@@ -87,30 +102,12 @@ function drawAll() {
   }
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawWindParticles(ctx);
+  drawScenarioMarkers(ctx, canvas.width, canvas.height);
   drawHUD(ctx, canvas.width, canvas.height);
 }
 
-function drawGameOver() {
-  const canvas = document.getElementById('wind-canvas');
-  const ctx    = canvas.getContext('2d');
-  const stage  = document.getElementById('vn-stage');
-  canvas.width  = stage.clientWidth;
-  canvas.height = stage.clientHeight;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#fff';
-  ctx.font = '18px "DotGothic16", monospace';
-  ctx.textAlign = 'center';
-  ctx.fillText('[ game over ]', canvas.width / 2, canvas.height / 2);
-  ctx.font = '11px "DotGothic16", monospace';
-  ctx.fillStyle = 'rgba(255,255,255,0.5)';
-  ctx.fillText('press enter to continue', canvas.width / 2, canvas.height / 2 + 32);
-  ctx.textAlign = 'left';
-}
-
 function drawHUD(ctx, W, H) {
-  if (gameState !== 'walking') return;
+  if (gameState !== 'hub') return;
   const motorColors = { forward: '#f5c542', neutral: '#fff', reverse: '#fb923c' };
   const col = motorColors[motorState];
 
@@ -131,11 +128,6 @@ function drawHUD(ctx, W, H) {
 function applyPlayerPos() {
   els.playerEl.style.left = player.x + 'px';
   els.playerEl.style.top  = player.y + 'px';
-}
-
-function applyDestPos() {
-  els.destEl.style.left = dest.x + 'px';
-  els.destEl.style.top  = dest.y + 'px';
 }
 
 function dist(a, b) {
@@ -161,13 +153,8 @@ function updatePlayer() {
     windAngle: wind.angle
   };
 
-  const next = tickPhysics(state, input);
-
-  if (next.x < 0 || next.x > W || next.y < 0 || next.y > H) {
-    gameState = 'game_over';
-    els.map.style.display = 'none';
-    return;
-  }
+  let next = tickPhysics(state, input);
+  next = clampToBounds(next, W, H, 20);
 
   player.x   = next.x;
   player.y   = next.y;
@@ -182,23 +169,24 @@ function updatePlayer() {
 }
 
 function gameLoop() {
-  if (gameState === 'game_over') {
-    drawGameOver();
-    return;
-  }
-  if (gameState !== 'walking') return;
+  if (gameState !== 'hub') return;
   updateWind();
   updateParticles();
   updatePlayer();
-  if (gameState === 'game_over') {
-    drawGameOver();
-    return;
-  }
   drawAll();
-  if (dist(player, dest) <= TRIGGER_DIST) {
-    startDialogue();
-    return;
+
+  const stage = document.getElementById('vn-stage');
+  const W = stage.clientWidth;
+  const H = stage.clientHeight;
+  for (const scenario of Object.values(SCENARIOS)) {
+    const mx = scenario.mapMarker.x * W;
+    const my = scenario.mapMarker.y * H;
+    if (Math.hypot(player.x - mx, player.y - my) <= TRIGGER_DIST) {
+      startDialogue(scenario.id);
+      return;
+    }
   }
+
   rafId = requestAnimationFrame(gameLoop);
 }
 
@@ -209,11 +197,13 @@ function resetGame() {
   const H = stage.clientHeight;
   player.x = W * 0.15;
   player.y = H * 0.50;
-  dest.x   = W * 0.75;
-  dest.y   = H * 0.50;
   applyPlayerPos();
-  applyDestPos();
-  boatAngle  = Math.atan2(dest.y - player.y, dest.x - player.x);
+
+  // Point boat toward first scenario marker
+  const firstScenario = Object.values(SCENARIOS)[0];
+  const mx = firstScenario.mapMarker.x * W;
+  const my = firstScenario.mapMarker.y * H;
+  boatAngle  = Math.atan2(my - player.y, mx - player.x);
   speed      = 0;
   motorState = 'neutral';
   wind.angle       = Math.PI / 4;

@@ -79,13 +79,6 @@ body {
   transition: transform 0.05s;
 }
 
-#destination {
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  background: #f5c542;
-  transform: translate(-50%, -50%);
-}
 
 #map-hint {
   position: absolute;
