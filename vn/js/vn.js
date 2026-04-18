@@ -7,7 +7,10 @@ let vnTypeTimer    = null;
 
 // ── SPRITES ───────────────────────────────────────────────────────────────
 function setSprite(name) {
-  els.charImg.src = SPRITES[name];
+  const charId = (currentScenarioId && SCENARIOS[currentScenarioId])
+    ? SCENARIOS[currentScenarioId].character
+    : 'kanon';
+  els.charImg.src = SPRITES[charId][name];
 }
 
 // ── BLINK CYCLE ───────────────────────────────────────────────────────────
@@ -44,7 +47,10 @@ function stopBlinkCycle() {
 function showBeat(id) {
   if (id === 'END') { endVN(); return; }
 
-  if (id === 'MINIGAME_SAIL') {
+  const activeScenario = currentScenarioId
+    ? SCENARIOS[currentScenarioId]
+    : null;
+  if (activeScenario && id === activeScenario.minigame.triggerBeat) {
     startMinigame();
     return;
   }

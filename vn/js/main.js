@@ -19,7 +19,9 @@ const els = {
 
 // ── PRELOAD ───────────────────────────────────────────────────────────────
 (function preloadAssets() {
-  Object.values(SPRITES).forEach(src => { const i = new Image(); i.src = src; });
+  Object.values(SPRITES).forEach(charSprites => {
+    Object.values(charSprites).forEach(src => { const i = new Image(); i.src = src; });
+  });
   Object.values(SCRIPT).forEach(node => { if (node.bg) { const i = new Image(); i.src = node.bg; } });
 })();
 
@@ -35,7 +37,9 @@ function startGame() {
   rafId = requestAnimationFrame(gameLoop);
 }
 
-function startDialogue() {
+function startDialogue(scenarioId) {
+  scenarioId = scenarioId || 'kanon_beach';
+  currentScenarioId = scenarioId;
   gameState = 'dialogue';
   cancelAnimationFrame(rafId);
   els.map.style.display = 'none';
@@ -43,7 +47,7 @@ function startDialogue() {
   void els.scene.offsetWidth;
   els.scene.style.opacity = '1';
   startBlinkCycle();
-  showBeat('s01');
+  showBeat(SCENARIOS[scenarioId].entryBeat);
 }
 
 function endVN() {

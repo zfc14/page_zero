@@ -7,13 +7,15 @@ const CHARACTERS = {
 };
 
 // ─────────────────────────────────────────────────────────────
-// SPRITES — mapa de nome para caminho de arquivo
+// SPRITES — por personagem, depois por expressão
 // ─────────────────────────────────────────────────────────────
 const SPRITES = {
-  neutral:   "../art/Girl_neutral.png",
-  semi_rest: "../art/Girl_semi_rest.png",
-  rest:      "../art/Girl_rest.png",
-  angry:     "../art/Girl_angry.png"
+  kanon: {
+    neutral:   "../art/Girl_neutral.png",
+    semi_rest: "../art/Girl_semi_rest.png",
+    rest:      "../art/Girl_rest.png",
+    angry:     "../art/Girl_angry.png"
+  }
 };
 
 // ─────────────────────────────────────────────────────────────
